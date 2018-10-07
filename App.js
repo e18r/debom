@@ -1,11 +1,28 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default class App extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
+        <TextInput
+          style={{width: 80}}
+          placeholder="amount"          
+        />
+        <TextInput
+          style={{width: 80}}
+          placeholder="debit"
+        />
+        <TextInput
+          style={{width: 80}}
+          placeholder="credit"
+        />
+        <Button
+          title="send"
+          onPress={() => {
+            Alert.alert("hola, mundo!");
+          }}
+        />
       </View>
     );
   }
@@ -14,7 +31,6 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
