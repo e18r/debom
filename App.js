@@ -1,5 +1,15 @@
-import React from 'react';
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, {Fragment} from 'react';
+import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+
+const token = 'EWHKelLq9VLhG0cuNxgghFUupgHaAo6ptgumLQv3HPsuS1UjP9l0Px7GkAhtlr9K';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
 
 export default class App extends React.Component {
 
@@ -9,21 +19,37 @@ export default class App extends React.Component {
       amount: null,
       currency: null,
       debit: null,
-      credit: null
+      credit: null,
+      comment: null,
+      balances: null
     };
   }
 
-  async postTransactions(amount, currency, debit, credit) {
-    try {
+  async componentWillMount() {
+    let response = await fetch('http://192.168.0.22:8080/balances', {
+      headers: {
+        Authorization: 'Bearer ' + token
+      }
+    });
+    let balances = await response.json();
+    this.setState({balances});
+  }
+
+  async postTransactions() {
+    const { amount, currency, debit, credit, comment } = this.state;
       let data = new FormData();
       data.append('amount', amount);
       data.append('currency', currency);
       data.append('debit', debit);
       data.append('credit', credit);
+      if(comment !== null) {
+	data.append('comment', comment);
+      }
+    try {
       let response = await fetch('http://192.168.0.22:8080/transactions', {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer hIMXPFWo6AYOMNAoPEqlfH7Oei3BwyCwMBcdUZwTcjxh0ihi1a7C72h9DnKZN2Fo'
+          Authorization: 'Bearer ' + token
         },
         body: data
       });
@@ -37,45 +63,56 @@ export default class App extends React.Component {
   };
   
   render() {
-    const {amount, currency, debit, credit} = this.state;
+    const { balances } = this.state;
+    let balanceTable = '';
+    if(balances) {
+      balanceTable = Object.keys(balances).map(type => {
+        return <Text key={type}>{type}</Text>;
+      });
+    }
     return (
-      <View style={styles.container}>
-        <TextInput
-          style={{width: 80}}
-          placeholder="amount"
-          onChangeText={(amount) => this.setState({amount})}
-        />
-	<TextInput
-          style={{width: 80}}
-          placeholder="currency"
-          onChangeText={(currency) => this.setState({currency})}
-        />
-        <TextInput
-          style={{width: 80}}
-          placeholder="debit"
-          onChangeText={(debit) => this.setState({debit})}
-        />
-        <TextInput
-          style={{width: 80}}
-          placeholder="credit"
-          onChangeText={(credit) => this.setState({credit})}
-        />
-        <Button
-          title="send"
-          onPress={async () => {
-              let response = await this.postTransactions(amount, currency, debit, credit);
+      <Fragment>
+        <View style={styles.container}>
+          <TextInput
+            style={{width: 80}}
+            placeholder="amount"
+            onChangeText={(amount) => this.setState({amount})}
+          />
+	  <TextInput
+            style={{width: 80}}
+            placeholder="currency"
+            onChangeText={(currency) => this.setState({currency})}
+          />
+          <TextInput
+            style={{width: 80}}
+            placeholder="debit"
+            onChangeText={(debit) => this.setState({debit})}
+          />
+          <TextInput
+            style={{width: 80}}
+            placeholder="credit"
+            onChangeText={(credit) => this.setState({credit})}
+          />
+          <TextInput
+            style={{width: 80}}
+            placeholder="comment"
+            onChangeText={(comment) => this.setState({comment})}
+          />
+          <Button
+            title="send"
+            onPress={async () => {
+              let response = await this.postTransactions();
 	      console.log(response);
-          }}
-        />
-      </View>
+            }}
+          />
+        </View>
+	<View style={styles.container}>
+          <Text>
+            {balanceTable}
+          </Text>
+        </View>
+      </Fragment>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
