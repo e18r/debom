@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Button, StyleSheet, Text, TextInput, View, WebView } from 'react-native';
 
-const token = 'EWHKelLq9VLhG0cuNxgghFUupgHaAo6ptgumLQv3HPsuS1UjP9l0Px7GkAhtlr9K';
+const token = 'fq3O2kLUSJEiBpSVJrZkajJUVFSWklw1ICh6gYbeYHsBNFUErxUVh6F1THxY8dJf';
 
 const styles = StyleSheet.create({
   container: {
@@ -25,7 +25,11 @@ export default class App extends React.Component {
     };
   }
 
-  async componentWillMount() {
+  componentWillMount() {
+    this.getBalances();
+  }
+
+  async getBalances() {
     let response = await fetch('http://192.168.0.22:8080/balances', {
       headers: {
         Authorization: 'Bearer ' + token
@@ -64,12 +68,21 @@ export default class App extends React.Component {
   
   render() {
     const { balances } = this.state;
-    let balanceTable = '';
+    let balanceTable = '<table><tr><th>type</th><th>account</th><th>currency</th><th>balance</th></tr>';
     if(balances) {
-      balanceTable = Object.keys(balances).map(type => {
-        return <Text key={type}>{type}</Text>;
+      Object.keys(balances).forEach(type => {
+        Object.keys(balances[type]).forEach(account => {
+          Object.keys(balances[type][account]).forEach(currency => {
+            balanceTable += '<tr><td>' + type + '</td>';
+            balanceTable += '<td>' + account + '</td>';
+            balanceTable += '<td>' + currency + '</td>';
+            balanceTable += '<td>' + balances[type][account][currency] + '</td></tr>';
+          });
+        });
       });
     }
+    balanceTable += '</table>';
+    
     return (
       <Fragment>
         <View style={styles.container}>
@@ -103,14 +116,14 @@ export default class App extends React.Component {
             onPress={async () => {
               let response = await this.postTransactions();
 	      console.log(response);
+              this.getBalances();
             }}
           />
         </View>
-	<View style={styles.container}>
-          <Text>
-            {balanceTable}
-          </Text>
-        </View>
+	<WebView
+          style={styles.container}
+          source={{html: balanceTable}}
+        />
       </Fragment>
     );
   }
