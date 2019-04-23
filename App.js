@@ -1,8 +1,6 @@
 import React, {Fragment} from 'react';
 import { Button, StyleSheet, Text, TextInput, View, WebView } from 'react-native';
 
-const token = 'fq3O2kLUSJEiBpSVJrZkajJUVFSWklw1ICh6gYbeYHsBNFUErxUVh6F1THxY8dJf';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -30,6 +28,7 @@ export default class App extends React.Component {
   }
 
   async getBalances() {
+    const { token } = this.props;
     let response = await fetch('http://192.168.0.22:8080/balances', {
       headers: {
         Authorization: 'Bearer ' + token
@@ -41,6 +40,7 @@ export default class App extends React.Component {
 
   async postTransactions() {
     const { amount, currency, debit, credit, comment } = this.state;
+    const { token } = this.props;
       let data = new FormData();
       data.append('amount', amount);
       data.append('currency', currency);
